@@ -73,7 +73,6 @@
   (lang [this]
     nil))
 
-
 (extend-protocol RDFLiteral
 
   java.math.BigInteger
@@ -187,7 +186,9 @@
     (.toString this))
 
   (datatype-uri [this]
-    rdf:langString))
+    (if (:lang this)
+      rdf:langString
+      xsd:string)))
 
 (defn language
   "Create an RDF langauge string out of a value string and a given
