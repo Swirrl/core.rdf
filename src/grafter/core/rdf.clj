@@ -315,6 +315,11 @@
   (when (graph t)
     true))
 
+(defn quad?
+  "Predicate function to test if the object is a valid RDF quad."
+  [q]
+  (when-not (graph q)
+    true))
 
 (defn triple=
   "Equality test for an RDF triple or quad, that checks whether the
