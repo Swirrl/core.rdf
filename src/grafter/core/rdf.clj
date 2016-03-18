@@ -273,23 +273,24 @@
   (subject [statement])
   (predicate [statement])
   (object [statement])
-  (context [statement]))
+  (graph [this]
+    "Returns the graph URI for this object"))
 
 (defn- destructure-quad [quad i default]
   (case i
     0 (:s quad)
     1 (:p quad)
     2 (:o quad)
-    3 (or (:c quad) default)
+    3 (or (:g quad) default)
     :else default))
 
 (defrecord Quad  ;; formerly grafter.rdf.protocols.Quad
-    [s p o c]
+    [s p o g]
   Statement
   (subject [s] (.s s))
   (predicate [s] (.p s))
   (object [s] (.o s))
-  (context [s] (.c s))
+  (graph [s] (.g s))
 
   clojure.lang.Indexed
   (nth [this ^int i]
@@ -311,9 +312,9 @@
 (defn triple?
   "Predicate function to test if object is a valid RDF triple."
   [t]
-  (if (context t)
-    true
-    false))
+  (when (graph t)
+    true))
+
 
 (defn triple=
   "Equality test for an RDF triple or quad, that checks whether the
