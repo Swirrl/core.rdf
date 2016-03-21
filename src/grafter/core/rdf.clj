@@ -331,9 +331,10 @@
   statements."
   [& quads]
   (every? #(let [f (first quads)]
-             (and (= (subject f) (subject %))
-                  (= (predicate f) (predicate %))
-                  (= (object f) (object %))))
+             (and (= (str (subject f)) (str (subject %)))
+                  (= (str (predicate f)) (str (predicate %)))
+                  (= (str (object f)) (str (object %))))
+             )
           (next quads)))
 
 (defprotocol QuadReadable ;; formerly grafter.rdf.protocols/ITripleReadable
