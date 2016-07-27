@@ -4,62 +4,80 @@
   (:import [java.net URI URL]
            [java.util Date]))
 
-(defprotocol IURIable
-  (->java-uri [url]
-    "Convert type into a java.net.URI"))
+(defprotocol URIable
+  (->uri [url]
+    "Convert type into the platforms standard URI object.  On the JVM this is
+    java.net.URI."))
 
-(extend-protocol IURIable
+(defprotocol URLable
+  (->url [url]
+    "Convert type into the platforms standard URL object.  On the JVM this is
+    java.net.URL."))
+
+(extend-protocol URIable
   String
-  (->java-uri [uri]
+  (->uri [uri]
     (URI. uri))
 
+  (->url [url]
+    (URL. url))
+
   URI
-  (->java-uri [uri]
+  (->uri [uri]
     uri)
 
-  URL
-  (->java-uri [url]
-    (.toURI url)))
+  (->url [uri]
+    (.toURI uri))
 
-(defn ->java-url
-  "Convert a URI into a java.net.URL."
-  [url]
-  (.toURL (->java-uri url)))
+  URL
+  (->uri [url]
+    (.toURI url))
+
+  (->url [url]
+    url))
+
+(extend-protocol URLable
+  String
+  (->url [url]
+    (URL. url))
+
+  URI
+
+  (->url [uri]
+    (.toURI uri))
+
+  URL
+  (->url [url]
+    url))
 
 (defprotocol RDFString
-  (lang [this]))
+  (lang [this]
+    "Get the language tag as a Clojure keyword for the supplied RDF string object.
+    Returns nil for strings that aren't RDF 1.1 langStrings."))
 
 (defprotocol RDFLiteral
-  (raw-value [this])
-  (datatype-uri [this]))
+  (raw-value [this]
+    "Return's the raw native platform value for the supplied object
+    type.")
+  (datatype-uri [this]
+    "Returns the RDF datatype URI for this type in the native
+    platforms URI format."))
 
-(def xsd:string "http://www.w3.org/2001/XMLSchema#string")
+(def rdf:langString (->uri "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"))
 
-(def xml11-2 "http://www.w3.org/TR/xmlschema11-2/#")
+(def xml11-2:string (->uri "http://www.w3.org/TR/xmlschema11-2/#string"))
+(def xsd:boolean (->uri "http://www.w3.org/2001/XMLSchema#boolean"))
+(def xsd:byte (->uri "http://www.w3.org/2001/XMLSchema#byte"))
+(def xsd:dateTime (->uri "http://www.w3.org/TR/xmlschema11-2/#dateTime"))
+(def xsd:decimal (->uri "http://www.w3.org/2001/XMLSchema#decimal"))
+(def xsd:double (->uri "http://www.w3.org/2001/XMLSchema#double"))
+(def xsd:float (->uri "http://www.w3.org/2001/XMLSchema#float"))
+(def xsd:int (->uri "http://www.w3.org/2001/XMLSchema#int"))
+(def xsd:integer (->uri "http://www.w3.org/2001/XMLSchema#integer"))
+(def xsd:long (->uri "http://www.w3.org/2001/XMLSchema#long"))
+(def xsd:short (->uri "http://www.w3.org/2001/XMLSchema#short"))
+(def xsd:string (->uri "http://www.w3.org/2001/XMLSchema#string"))
 
-(def xsd:boolean "http://www.w3.org/2001/XMLSchema#boolean")
-
-(def xsd:byte "http://www.w3.org/2001/XMLSchema#byte")
-
-(def xsd:short "http://www.w3.org/2001/XMLSchema#short")
-
-(def xsd:decimal "http://www.w3.org/2001/XMLSchema#decimal")
-
-(def xsd:double "http://www.w3.org/2001/XMLSchema#double")
-
-(def xsd:float "http://www.w3.org/2001/XMLSchema#float")
-
-(def xsd:integer "http://www.w3.org/2001/XMLSchema#integer")
-
-(def xsd:int "http://www.w3.org/2001/XMLSchema#int")
-
-(def xml11-2:string "http://www.w3.org/TR/xmlschema11-2/#string")
-
-(def xsd:string "http://www.w3.org/2001/XMLSchema#string")
-
-(def xsd:dateTime "http://www.w3.org/TR/xmlschema11-2/#dateTime")
-
-(def rdf:langString "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString")
 
 (defrecord Literal [raw-value datatype-uri]
   RDFLiteral
@@ -67,7 +85,7 @@
     (:raw-value this))
 
   (datatype-uri [this]
-    (->java-uri (:datatype-uri this)))
+    (->uri (:datatype-uri this)))
 
   RDFString
   (lang [this]
@@ -80,77 +98,77 @@
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:integer))
+    xsd:integer)
 
   java.math.BigDecimal
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:decimal))
+    xsd:decimal)
 
   Boolean
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:boolean))
+    xsd:boolean)
 
   Byte
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:byte))
+    xsd:byte)
 
   Date
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:dateTime))
+    xsd:dateTime)
 
   Double
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:double))
+    xsd:double)
 
   Float
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:float))
+    xsd:float)
 
   Integer
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:integer))
+    xsd:integer)
 
   Long
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:integer))
+    xsd:long)
 
   Short
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:short))
+    xsd:short)
 
   String
   (raw-value [t]
     t)
 
   (datatype-uri [t]
-    (->java-uri xsd:string))
+    xsd:string)
 
   (lang [t]
     nil))
@@ -166,7 +184,7 @@
     this)
 
   (datatype-uri [this]
-    (->java-uri xsd:string)))
+    xsd:string))
 
 (defrecord LangString [string lang]
   RDFString
@@ -207,7 +225,7 @@
   shounld't need this."
 
   [val datatype-uri]
-  (->Literal (str val) (->java-uri datatype-uri)))
+  (->Literal (str val) (->uri datatype-uri)))
 
 (defmulti literal->clj-type
   "A multimethod to convert an RDF literal into a corresponding
@@ -220,45 +238,45 @@
 (defmethod literal->clj-type nil [literal]
   (language (raw-value literal) (lang literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#boolean" [literal]
+(defmethod literal->clj-type xsd:boolean [literal]
   (Boolean/parseBoolean (raw-value literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#byte" [literal]
+(defmethod literal->clj-type xsd:byte [literal]
   (Byte/parseByte (raw-value literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#short" [literal]
+(defmethod literal->clj-type xsd:short [literal]
   (Short/parseShort (raw-value literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#decimal" [literal]
+(defmethod literal->clj-type xsd:decimal [literal]
   ;; Prefer clj's big integer over java's because of hash code issue:
   ;; http://stackoverflow.com/questions/18021902/use-cases-for-bigint-versus-biginteger-in-clojure
   (bigint (java.math.BigInteger. (raw-value literal))))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#double" [literal]
+(defmethod literal->clj-type xsd:double [literal]
   (Double/parseDouble (raw-value literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#float" [literal]
+(defmethod literal->clj-type xsd:float [literal]
   (Float/parseFloat (raw-value literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#integer" [literal]
+(defmethod literal->clj-type xsd:integer [literal]
   (bigint (raw-value literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#int" [literal]
+(defmethod literal->clj-type xsd:int [literal]
   (java.lang.Integer/parseInt (raw-value literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#long" [literal]
+(defmethod literal->clj-type xsd:long [literal]
   (java.lang.Long/parseLong (raw-value literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/TR/xmlschema11-2/#string" [literal]
+(defmethod literal->clj-type xml11-2:string [literal]
   (language (raw-value literal) (lang literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#string" [literal]
+(defmethod literal->clj-type xsd:string [literal]
   (raw-value literal))
 
-(defmethod literal->clj-type "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" [literal]
+(defmethod literal->clj-type rdf:langString [literal]
   (language (raw-value literal) (lang literal)))
 
-(defmethod literal->clj-type "http://www.w3.org/2001/XMLSchema#dateTime" [literal]
+(defmethod literal->clj-type xsd:dateTime [literal]
   (-> literal .calendarValue .toGregorianCalendar .getTime))
 
 (defmethod literal->clj-type :default [literal]
@@ -267,6 +285,11 @@
   ;; as they might just want to pass data through rather than
   ;; understand it.
   literal)
+
+(defprotocol ClojureTypeConverter
+  ;; TODO add support for a top level type coercer that will coerce a
+  ;; backends implementation of URIs or literals etc into clojure types
+  (->clj-type [t]))
 
 (defprotocol Statement ;; Formerly grafter.rdf.protocols/IStatement
   "An RDF triple or quad"
@@ -333,8 +356,7 @@
   (every? #(let [f (first quads)]
              (and (= (str (subject f)) (str (subject %)))
                   (= (str (predicate f)) (str (predicate %)))
-                  (= (str (object f)) (str (object %))))
-             )
+                  (= (str (object f)) (str (object %)))))
           (next quads)))
 
 (defprotocol QuadReadable ;; formerly grafter.rdf.protocols/ITripleReadable
